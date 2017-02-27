@@ -1,0 +1,10 @@
+<form action="/userAuth/register/" method="post">
+    {% csrf_token %}
+    <label for="username">Your user name:</label>
+    <input id="username" type="text" name="username" value="{{username}}">
+    <label for="password">Your password:</label>
+    <input id="password" type="text" name="password" value="{{password}}">
+    <label for="email">Your email:</label>
+    <input id="email" type="text" name="email" value="{{email}}">
+    <input type="submit" value="Register" />
+</form>

@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ["colab-sbx-pvt-25.oit.duke.edu", u'127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'userAuth.apps.UserauthConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

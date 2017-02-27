@@ -1,0 +1,9 @@
+<form action="/userAuth/checkUser/" method="post">
+    {% csrf_token %}
+    <label for="username">Your user name:</label>
+    <input id="username" type="text" name="username" value="{{username}}">
+    <label for="password">Your password:</label>
+    <input id="password" type="text" name="password" value="{{password}}">
+    <input type="submit" value="LOGIN" />
+</form>
+<a href="/userAuth/info">New User?</a>
