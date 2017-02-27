@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="sftp://bitnami@colab-sbx-pvt-25.oit.duke.edu:22/usr/bin/python3" name="sftp://bitnami@colab-sbx-pvt-25.oit.duke.edu:22">
+        <fileTransfer host="colab-sbx-pvt-25.oit.duke.edu" port="22" accessType="SFTP">
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
