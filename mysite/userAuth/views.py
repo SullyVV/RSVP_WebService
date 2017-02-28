@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 
 from .models import User
@@ -12,11 +12,14 @@ def checkUser(request):
     username = request.POST['username']
     password = request.POST['password']
     stored_pswd = User.objects.get(user_name = username)
+
     print(password)
     print(stored_pswd)
     if (str(password) == str(stored_pswd)):
         #go to user page
-        return HttpResponse("go to user page")
+        #return HttpResponseRedirect(reverse('rsvp:userinfo', args=(username,)))
+        return redirect('/rsvp/userinfo/')
+        #return HttpResponseRedirect(reverse('/rsvp/userinfo/' + username))
     else:
         #go to main login page
         return render(request, "userAuth/index.html", {})

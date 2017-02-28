@@ -9,3 +9,5 @@ class User(models.Model):
     user_email = models.CharField(max_length=255)
     def __str__(self):
         return self.user_password
+    def getPassword(self):
+        return self.user_password

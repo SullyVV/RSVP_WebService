@@ -19,4 +19,5 @@ urlpatterns = [
     url(r'^polls/', include('polls.urls')),
     url(r'^userAuth/', include('userAuth.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^rsvp/', include('rsvp.urls')),
 ]
