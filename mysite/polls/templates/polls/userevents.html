@@ -1,0 +1,23 @@
+<h1>welcome: {{username}}</h1>
+
+<h3>Event created by this user are: </h3>
+{% if event_created %}
+    <ul>
+    {% for event in event_created %}
+        <li><a href="{% url 'polls:event' event.id %}">{{ event.title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No event created by this user.</p>
+{% endif %}
+
+<h3>Answer created by this user are:</h3>
+{% if answer_made %}
+    <ul>
+    {% for answer in answer_made %}
+        <li><a href="{% url 'polls:answer' 1 %}">{{ answer }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No answer created by this user.</p>
+{% endif %}

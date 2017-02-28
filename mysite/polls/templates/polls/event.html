@@ -1,0 +1,27 @@
+<h1>Event Information:</h1>
+<p>Event Title: {{event.title}}</p>
+<p>Event Owner: {{event.owner_name}}</p>
+<p>Event Descrption: {{event.descrption}}</p>
+<p>Event Date: {{event.date}}</p>
+<p>Event Place: {{Event.place}}</p>
+<a href="{% url 'polls:event_edit' event.id %}">Edit?</a>
+
+<h2>here are others's response</h2>
+{% if answers %}
+    <ul>
+    {% for answer in answers %}
+        <li>
+            <p>guest name: {{answer.answer_name}}</p>
+            {% if answer.plusOne %}
+                <p>This guest will bring others</p>
+            {% endif %}
+            {% if answer.willCome %}
+                <p>This guest will attend</p>
+            {% endif %}
+            <p>comment: {{answer.comment}}</p>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No answer is available.</p>
+{% endif %}
