@@ -1,0 +1,13 @@
+<h1>Event Information:</h1>
+<p>Event Title: {{event.title}}</p>
+<p>Event Owner: {{event.owner_name}}</p>
+<p>Event Descrption: {{event.descrption}}</p>
+<p>Event Date: {{event.event_time}}</p>
+<p>Event Place: {{event.place}}</p>
+
+<h1>Create Answer：</h1>
+<form method = 'post' enctype="multipart/form-data">
+    {% csrf_token %}
+{{af.as_p}}
+<input type="submit" value = "ok" />
+</form>

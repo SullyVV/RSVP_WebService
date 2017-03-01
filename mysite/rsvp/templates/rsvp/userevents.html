@@ -1,0 +1,47 @@
+<h1>welcome: {{user.username}}</h1>
+<h3><a href="{% url 'polls:event_create' user.id %}">Create Event</a></h3>
+<h3>Event created by this user are: </h3>
+{% if event_created %}
+    <ul>
+    {% for event in event_created %}
+        <li><a href="{% url 'polls:event' event.id %}">{{ event.title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No event created by this user.</p>
+{% endif %}
+
+
+{% if vender_relation %}
+    <h3>You are assigned as vender for the following events: </h3>
+    <ul>
+        {% for vr in vender_relation %}
+        <li><a href="{% url 'polls:vender' vr.id %}">{{ vr }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You are not assigned as vender to any events.</p>
+{% endif %}
+
+
+
+
+
+{% if event_invited %}
+    <h3>Answer posted by this user are:</h3>
+    <ul>
+        {% for answer in answer_made %}
+        <li><a href="{% url 'polls:answer' answer.id %}">{{ answer }}</a></li>
+        {% endfor %}
+    </ul>
+    <h3>Answer needed from this user are:</h3>
+    <ul>
+    {% for relation in event_invited %}
+        {% if not relation.isAnswered and not relation.isFinal %}
+            <li><a href="{% url 'polls:answer_create' relation.id user.id %}">{{ relation }}</a></li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>You are not invited to any event</p>
+{% endif %}

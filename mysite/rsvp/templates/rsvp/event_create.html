@@ -1,0 +1,14 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Event Create</title>
+</head>
+<body>
+<h1>Create Event：</h1>
+<form method = 'post' enctype="multipart/form-data">
+    {% csrf_token %}
+{{ef.as_p}}
+<input type="submit" value = "ok" />
+</form>
+</body>
+</html>
