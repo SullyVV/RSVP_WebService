@@ -1,10 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<h1>Answer:</h1>
+<p>Event Title: {{answer.event_title}}</p>
+<p>Comment: {{answer.comment}}</p>
+{% if answer.willCome%}
+    <p>I will come</p>
+    {% if  answer.plusOne %}
+        <p>I will bring more people with me</p>
+    {% else  %}
+        <p>I will come alone</p>
+    {% endif %}
+{% else %}
+<p>I will not come</p>
+{% endif %}
 
-</body>
-</html>
+<a href="{% url 'polls:answer_edit' answer.id %}">Edit?</a>

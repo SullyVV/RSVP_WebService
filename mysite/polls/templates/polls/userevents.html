@@ -1,5 +1,5 @@
-<h1>welcome: {{username}}</h1>
-
+<h1>welcome: {{user.username}}</h1>
+<h3><a href="{% url 'polls:event_create' user.id %}">Create Event</a></h3>
 <h3>Event created by this user are: </h3>
 {% if event_created %}
     <ul>
@@ -11,13 +11,21 @@
     <p>No event created by this user.</p>
 {% endif %}
 
-<h3>Answer created by this user are:</h3>
-{% if answer_made %}
+{% if event_invited %}
+    <h3>Answer posted by this user are:</h3>
     <ul>
-    {% for answer in answer_made %}
-        <li><a href="{% url 'polls:answer' 1 %}">{{ answer }}</a></li>
+        {% for answer in answer_made %}
+        <li><a href="{% url 'polls:answer' answer.id %}">{{ answer }}</a></li>
+        {% endfor %}
+    </ul>
+    <h3>Answer needed from this user are:</h3>
+    <ul>
+    {% for relation in event_invited %}
+        {% if not relation.isAnswered %}
+        <li><a href="{% url 'polls:answer_create' relation.id user.id %}">{{ relation }}</a></li>
+        {% endif %}
     {% endfor %}
     </ul>
 {% else %}
-    <p>No answer created by this user.</p>
+    <p>You are not invited to any event</p>
 {% endif %}

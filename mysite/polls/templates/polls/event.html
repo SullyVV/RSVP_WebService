@@ -2,8 +2,14 @@
 <p>Event Title: {{event.title}}</p>
 <p>Event Owner: {{event.owner_name}}</p>
 <p>Event Descrption: {{event.descrption}}</p>
-<p>Event Date: {{event.date}}</p>
-<p>Event Place: {{Event.place}}</p>
+<p>Event Date: {{event.event_time}}</p>
+<p>Event Place: {{event.place}}</p>
+
+<p>Invited guests:
+{% for relation in relations %}
+    {{relation.guest_name}}&nbsp;
+{% endfor %}
+</p>
 <a href="{% url 'polls:event_edit' event.id %}">Edit?</a>
 
 <h2>here are others's response</h2>
