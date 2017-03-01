@@ -22,6 +22,11 @@ urlpatterns = [
     url(r'^answer/(?P<answer_id>[0-9]+)/edit/$', views.answer_edit, name='answer_edit'),
     #/polls/answer/create/5(event_id)/5(user_id)
     url(r'^answer/create/(?P<relation_id>[0-9]+)/(?P<user_id>[0-9]+)/$', views.answer_create, name='answer_create'),
+    #/polls/vender/5(vender_id)
+    url(r'^vender/(?P<vender_id>[0-9]+)/$', views.vender, name='vender'),
+
+
+
     # ex: /polls/5/
     url(r'^(?P<question_id>[0-9]+)/$', views.detail, name='detail'),
     # ex: /polls/5/results/

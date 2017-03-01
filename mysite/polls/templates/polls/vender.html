@@ -1,7 +1,7 @@
 <h1>Event Information:</h1>
 <p>Event Title: {{event.title}}</p>
 <p>Event Owner: {{event.owner_name}}</p>
-<p>Event Descrption: {{event.descrption}}</p>
+<p>Event Description: {{event.descrption}}</p>
 <p>Event Date: {{event.event_time}}</p>
 <p>Event Place: {{event.place}}</p>
 
@@ -13,8 +13,6 @@
 
 {% if event.isFinal %}
 <p>This is event is finalized!</p>
-{% else %}
-<a href="{% url 'polls:event_edit' event.id %}">Edit?</a>
 {% endif %}
 
 <h2>here are others's response</h2>
@@ -35,4 +33,15 @@
     </ul>
 {% else %}
     <p>No answer is available.</p>
+{% endif %}
+
+{% if event.isFinal %}
+<p>This event is finalized</p>
+{% else %}
+    <h2>Do you want to finalize this event?</h2>
+    <form method = 'post' enctype="multipart/form-data">
+        {% csrf_token %}
+    {{ff.as_p}}
+    <input type="submit" value = "ok" />
+    </form>
 {% endif %}

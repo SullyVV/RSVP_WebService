@@ -12,8 +12,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.views import generic
 from django.views.generic import View
-from .forms import UserForm_register, UserForm_login, EventForm, AnswerForm
-from .models import User, Event, Answer, Relationship
+from .forms import UserForm_register, UserForm_login, EventForm, AnswerForm, FinalForm
+from .models import User, Event, Answer, Relationship, Vender
 
 # Create your views here.
 def detail(request, question_id):
@@ -38,12 +38,14 @@ def event_create(request, user_id):
             event_description = ef.cleaned_data['event_description']
             event_guests = ef.cleaned_data['event_guests']
             event_plusOne = ef.cleaned_data['event_plusOne']
+            event_vender = ef.cleaned_data['event_vender']
             event = Event()
             event.created_by = user
             event.owner_name = user.username
             event.title = event_title
             event.descrption = event_description
             event.event_time = event_time
+            event.vender_name = event_vender
             event.place = event_place
             event.plusOne = event_plusOne
             event.save()
@@ -55,6 +57,14 @@ def event_create(request, user_id):
                 relation.guest_name = guest
                 relation.isAnswered = False
                 relation.save()
+            #create vender relationship for this event
+            vender_user = get_object_or_404(User, username=event_vender)
+            vender = Vender()
+            vender.event = event
+            vender.event_title = event_title
+            vender.vender = vender_user
+            vender.vender_name = vender_user.username
+            vender.save()
             return HttpResponseRedirect(reverse('polls:user', args=(user_id,)))
             # return redirect('polls:login')
     else:
@@ -62,8 +72,38 @@ def event_create(request, user_id):
     return render_to_response("polls/event_create.html", {'ef': ef}, RequestContext(request))
 
 
+def vender(request, vender_id):
+    vender_relation = get_object_or_404(Vender, pk=vender_id)
+    event = vender_relation.event
+    vender = vender_relation.vender
+    answers = Answer.objects.filter(event_title=event.title)
+    relations = Relationship.objects.filter(event_title=event.title)
+    if request.method == "POST":
+        ff = FinalForm(request.POST)
+        if ff.is_valid():
+            isFinal = ff.cleaned_data['final']
+            if isFinal:
+                #update event table
+                event.isFinal = isFinal
+                event.save()
+                #update answer for this event
+                for answer in answers:
+                    answer.isEditable = False
+                    answer.save()
+                #update relationship table, all relationship on about this event should be marked as finalized
+                relations = Relationship.objects.filter(event_title = event.title)
+                for relation in relations:
+                    relation.isFinal = isFinal
+                    relation.save()
+            #redirect to vender's page
+            return HttpResponseRedirect(reverse('polls:user', args=(vender.id,)))
+    else:
+        ff = FinalForm()
+    return render_to_response("polls/vender.html", {'ff':ff, 'event':event, 'answers':answers, 'relations':relations}, RequestContext(request))
 
-    return HttpResponse("in event create page")
+
+
+
 
 def event_edit(request, event_id):
     if request.method == "POST":
@@ -170,8 +210,9 @@ def user(request, userid):
     event_created = Event.objects.filter(owner_name = user.username)
     event_invited = Relationship.objects.filter(guest_name = user.username)
     answer_made = Answer.objects.filter(answer_name = user.username)
+    vender_relation = Vender.objects.filter(vender_name = user.username)
     return render(request, 'polls/userevents.html',
-                  {'user': user, 'event_created': event_created, 'event_invited': event_invited, 'answer_made':answer_made})
+                  {'user': user, 'event_created': event_created, 'event_invited': event_invited, 'answer_made':answer_made, 'vender_relation':vender_relation})
     # show all event of current user and put a plus button for it to add new event, traverse through entire database and show events
 
 
