@@ -14,6 +14,8 @@ from django.views import generic
 from django.views.generic import View
 from .forms import UserForm_register, UserForm_login, EventForm, AnswerForm, FinalForm
 from .models import User, Event, Answer, Relationship, Vender
+from django.core.mail import send_mail
+from django.conf import settings
 
 # Create your views here.
 def detail(request, question_id):
@@ -57,6 +59,16 @@ def event_create(request, user_id):
                 relation.guest_name = guest
                 relation.isAnswered = False
                 relation.save()
+            to_email = []
+            subject = "New invitation from RSVP.com"
+            from_email = settings.EMAIL_HOST_USER
+            contact_msg = "Hey, You have pending invitations at RSVP web app"
+            for guest in guestList:
+                user = get_object_or_404(User, username = guest)
+                to_email.append(user.email)
+            # send to all guests
+            print(to_email)
+            send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
             #create vender relationship for this event
             vender_user = get_object_or_404(User, username=event_vender)
             vender = Vender()
@@ -272,3 +284,11 @@ def login(request):
     else:
         uf = UserForm_login()
     return render_to_response('polls/login.html', {'uf':uf})
+
+def send(request):
+    subject = "Site contact form"
+    from_email = settings.EMAIL_HOST_USER
+    to_email = ['johndong9317@gmail.com', 'gd50@gmail.com', 'AmberWangjie@gmail.com']
+    contact_msg = "check out rsvp app"
+    send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
+    return HttpResponse("on send email page")

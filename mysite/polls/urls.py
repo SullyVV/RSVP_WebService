@@ -4,7 +4,7 @@ app_name = 'polls'
 urlpatterns = [
     #/polls/
     url(r'^$', views.index, name='index'),
-    #/register/,
+    #/polls/register/,
     url(r'^register/$', views.register, name='register'),
     #/login/,
     url(r'^login/$', views.login, name='login'),
@@ -24,7 +24,8 @@ urlpatterns = [
     url(r'^answer/create/(?P<relation_id>[0-9]+)/(?P<user_id>[0-9]+)/$', views.answer_create, name='answer_create'),
     #/polls/vender/5(vender_id)
     url(r'^vender/(?P<vender_id>[0-9]+)/$', views.vender, name='vender'),
-
+    #/polls/send/
+    url(r'^send/$', views.send, name='send'),
 
 
     # ex: /polls/5/
