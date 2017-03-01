@@ -39,6 +39,8 @@ class Event(models.Model):
     place = models.CharField(max_length=50)
     plusOne = models.BooleanField(default=False)
     isFinal = models.BooleanField(default=False)
+    venderPermitted = models.BooleanField(default=True)
+
     def __str__(self):
         return self.title + " -- " + str(self.id)
 

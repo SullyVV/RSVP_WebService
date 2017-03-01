@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.views import generic
 from django.views.generic import View
-from .forms import UserForm_register, UserForm_login, EventForm, AnswerForm, FinalForm
+from .forms import UserForm_register, UserForm_login, EventForm, AnswerForm, FinalForm, EventEditForm
 from .models import User, Event, Answer, Relationship, Vender
 from django.core.mail import send_mail
 from django.conf import settings
@@ -41,6 +41,7 @@ def event_create(request, user_id):
             event_guests = ef.cleaned_data['event_guests']
             event_plusOne = ef.cleaned_data['event_plusOne']
             event_vender = ef.cleaned_data['event_vender']
+            event_venderPermitted = ef.cleaned_data['event_venderPermitted']
             event = Event()
             event.created_by = user
             event.owner_name = user.username
@@ -50,6 +51,7 @@ def event_create(request, user_id):
             event.vender_name = event_vender
             event.place = event_place
             event.plusOne = event_plusOne
+            event.venderPermitted = event_venderPermitted
             event.save()
             #create relations for this event
             guestList = event_guests.split(";")
@@ -119,37 +121,46 @@ def vender(request, vender_id):
 
 def event_edit(request, event_id):
     if request.method == "POST":
-        uf = EventForm(request.POST)
+        uf = EventEditForm(request.POST)
         if uf.is_valid():
-            event_title = uf.cleaned_data['event_title']
             event_time = uf.cleaned_data['event_time']
             event_place = uf.cleaned_data['event_place']
             event_description = uf.cleaned_data['event_description']
             event_plusOne = uf.cleaned_data['event_plusOne']
-            event_guests = uf.cleaned_data['event_guests']
-            guestList = event_guests.split(";")
+            event_newGuests = uf.cleaned_data['event_newGuests']
+            event_venderPermitted = uf.cleaned_data['event_venderPermitted']
+            newguestList = event_newGuests.split(";")
             event = get_object_or_404(Event, pk=event_id)
             #update event table
-            event.title = event_title
             event.event_time = event_time
             event.place = event_place
             event.descrption = event_description
             event.plusOne = event_plusOne
+            event.venderPermitted = event_venderPermitted
             event.save()
             #update relationship table, if user exist, save into relationship
-            for guest in guestList:
+            for guest in newguestList:
                 if User.objects.filter(username = guest).exists():
                     print(guest + " exists")
                     relation = Relationship()
-                    relation.event_title = event_title
+                    relation.event_title = event.title
                     relation.guest_name = guest
                     relation.isAnswered = False
                     relation.save()
+            to_email = []
+            subject = "New invitation from RSVP.com"
+            from_email = settings.EMAIL_HOST_USER
+            contact_msg = "Hey, You have pending invitations at RSVP web app"
+            for guest in newguestList:
+                user = get_object_or_404(User, username=guest)
+            to_email.append(user.email)
+            # send to all guests
+            print(to_email)
+            send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
             #redirect to event page
             return HttpResponseRedirect(reverse('polls:event', args=(event_id,)))
-            #return redirect('polls:login')
     else:
-        uf = EventForm()
+        uf = EventEditForm()
     return render_to_response("polls/event_edit.html", {'uf':uf}, RequestContext(request))
 
 

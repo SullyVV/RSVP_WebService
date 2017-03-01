@@ -21,13 +21,15 @@
     {% for answer in answers %}
         <li>
             <p>guest name: {{answer.answer_name}}</p>
-            {% if answer.plusOne %}
-                <p>This guest will bring others</p>
-            {% endif %}
-            {% if answer.willCome %}
-                <p>This guest will attend</p>
-            {% endif %}
             <p>comment: {{answer.comment}}</p>
+            {% if event.venderPermitted %}
+                {% if answer.plusOne %}
+                    <p>This guest will bring others</p>
+                {% endif %}
+                {% if answer.willCome %}
+                    <p>This guest will attend</p>
+                {% endif %}
+            {% endif %}
         </li>
     {% endfor %}
     </ul>
