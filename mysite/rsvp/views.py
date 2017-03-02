@@ -16,9 +16,10 @@ from django.conf import settings
 
 def event(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
+    user = get_object_or_404(User, username=event.owner_name)
     answers = Answer.objects.filter(event_title=event.title)
     relations = Relationship.objects.filter(event_title=event.title)
-    return render(request, 'rsvp/event.html', {'event':event, "answers":answers, "relations":relations})
+    return render(request, 'rsvp/event.html', {'event':event, "answers":answers, "relations":relations, 'user':user})
 
 
 def event_create(request, user_id):
@@ -75,7 +76,7 @@ def event_create(request, user_id):
             # return redirect('rsvp:login')
     else:
         ef = EventForm()
-    return render_to_response("rsvp/event_create.html", {'ef': ef}, RequestContext(request))
+    return render_to_response("rsvp/event_create.html", {'ef': ef, 'user':user}, RequestContext(request))
 
 
 def vender(request, vender_id):
@@ -105,13 +106,15 @@ def vender(request, vender_id):
             return HttpResponseRedirect(reverse('rsvp:user', args=(vender.id,)))
     else:
         ff = FinalForm()
-    return render_to_response("rsvp/vender.html", {'ff':ff, 'event':event, 'answers':answers, 'relations':relations}, RequestContext(request))
+    return render_to_response("rsvp/vender.html", {'ff':ff, 'event':event, 'answers':answers, 'relations':relations, 'user':vender}, RequestContext(request))
 
 
 
 
 
 def event_edit(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    user = get_object_or_404(User, username=event.owner_name)
     if request.method == "POST":
         uf = EventEditForm(request.POST)
         if uf.is_valid():
@@ -130,44 +133,55 @@ def event_edit(request, event_id):
             event.plusOne = event_plusOne
             event.venderPermitted = event_venderPermitted
             event.save()
+            # inform old guests that there are changes in this event
+            subject = "Modified Event from RSVP Web App"
+            contact_msg = "Hey, an event you are involved is modified, come and check it out."
+            from_email = settings.EMAIL_HOST_USER
+            relations = Relationship.objects.filter(event_title=event.title)
+            to_email = []
+            for relation in relations:
+                guest_name = relation.guest_name
+                user = User.objects.get(username=guest_name)
+                to_email.append(user.email)
+            send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
             #update relationship table, if user exist, save into relationship
+            to_email = []
+            subject = "New Invitation from RSVP Web App"
+            contact_msg = "Hey, You have pending invitations at RSVP web app."
             for guest in newguestList:
                 if User.objects.filter(username = guest).exists():
-                    print(guest + " exists")
                     relation = Relationship()
                     relation.event_title = event.title
                     relation.guest_name = guest
                     relation.isAnswered = False
                     relation.save()
-            to_email = []
-            subject = "New invitation from RSVP.com"
-            from_email = settings.EMAIL_HOST_USER
-            contact_msg = "Hey, You have pending invitations at RSVP web app"
-            for guest in newguestList:
-                user = get_object_or_404(User, username=guest)
-            to_email.append(user.email)
-            # send to all guests
-            print(to_email)
+                    user = User.objects.get(username=guest)
+                    to_email.append(user.email)
+            # send to new guests
             send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
             #redirect to event page
             return HttpResponseRedirect(reverse('rsvp:event', args=(event_id,)))
     else:
         uf = EventEditForm()
-    return render_to_response("rsvp/event_edit.html", {'uf':uf}, RequestContext(request))
+    return render_to_response("rsvp/event_edit.html", {'uf':uf, 'user':user}, RequestContext(request))
 
 
 def answer(request, answer_id):
     answer = get_object_or_404(Answer, pk=answer_id)
-    return render(request, 'rsvp/answer.html', {'answer':answer})
+    username = answer.answer_name
+    user = get_object_or_404(User, username=username)
+    return render(request, 'rsvp/answer.html', {'answer':answer, 'user':user})
 
 def answer_edit(request, answer_id):
+    answer = get_object_or_404(Answer, pk=answer_id)
+    username = answer.answer_name
+    user = get_object_or_404(User, username=username)
     if request.method == "POST":
         af = AnswerForm(request.POST)
         if af.is_valid():
             comment = af.cleaned_data['comment']
             plusOne = af.cleaned_data['plusOne']
             willCome = af.cleaned_data['willCome']
-            answer = get_object_or_404(Answer, pk = answer_id)
             answer.comment = comment
             answer.plusOne = plusOne
             answer.willCome = willCome
@@ -177,7 +191,7 @@ def answer_edit(request, answer_id):
             #return redirect('rsvp:login')
     else:
         af = AnswerForm()
-    return render_to_response("rsvp/answer_edit.html", {'af':af}, RequestContext(request))
+    return render_to_response("rsvp/answer_edit.html", {'af':af, 'user':user}, RequestContext(request))
 
 
 def answer_create(request, relation_id, user_id):
@@ -210,9 +224,10 @@ def answer_create(request, relation_id, user_id):
             #return redirect('rsvp:login')
     else:
         af = AnswerForm()
-    return render_to_response("rsvp/answer_create.html", {'event':event,'af':af}, RequestContext(request))
+    return render_to_response("rsvp/answer_create.html", {'event':event,'af':af, 'user':user}, RequestContext(request))
 
 def index(request):
+    return render(request, 'rsvp/index.html')
     return render(request, 'rsvp/base.html')
     #return render(request, 'rsvp/index.html', {'latest_question_list': latest_question_list,})
 
@@ -255,7 +270,6 @@ def login(request):
             password = uf.cleaned_data['password']
             user = User.objects.filter(username = username, password = password)
             if user:
-                #return render_to_response('rsvp/success.html', {'username':username})
                 #redirect to user page by userid
                 userid = User.objects.get(username = username).id
                 return HttpResponseRedirect(reverse('rsvp:user', args=(userid,)))

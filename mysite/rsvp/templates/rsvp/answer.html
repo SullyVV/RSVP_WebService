@@ -1,4 +1,8 @@
-<h1>Answer: (If you decide not to come, do not complete the form)</h1>
+{% extends 'rsvp/base.html' %}
+{% block title %}Userpage{% endblock %}
+{% block body %}
+<center>
+<h1>Response made: </h1>
 <p>Event Title: {{answer.event_title}}</p>
 <p>Comment: {{answer.comment}}</p>
 {% if answer.willCome%}
@@ -12,7 +16,9 @@
 <p>I will not come</p>
 {% endif %}
 {% if answer.isEditable %}
-<a href="{% url 'polls:answer_edit' answer.id %}">Edit?</a>
+<a href="{% url 'rsvp:answer_edit' answer.id %}">Edit?</a>
 {% else %}
-<p>This answer is not editable</p>
+<p><strong>This answer is not editable</strong></p>
 {% endif %}
+</center>
+{% endblock %}

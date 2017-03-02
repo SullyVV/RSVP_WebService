@@ -1,3 +1,7 @@
+{% extends 'rsvp/base.html' %}
+{% block title %}Event{% endblock %}
+{% block body %}
+<center>
 <h1>Event Information:</h1>
 <p>Event Title: {{event.title}}</p>
 <p>Event Owner: {{event.owner_name}}</p>
@@ -12,9 +16,9 @@
 </p>
 
 {% if event.isFinal %}
-<p>This is event is finalized!</p>
+    <p><strong>This is event is finalized!</strong></p>
 {% else %}
-<a href="{% url 'polls:event_edit' event.id %}">Edit?</a>
+<a href="{% url 'rsvp:event_edit' event.id %}">Edit?</a>
 {% endif %}
 
 <h2>here are others's response</h2>
@@ -22,17 +26,21 @@
     <ul>
     {% for answer in answers %}
         <li>
-            <p>guest name: {{answer.answer_name}}</p>
-            {% if answer.plusOne %}
-                <p>This guest will bring others</p>
-            {% endif %}
+            <p><strong>guest name: {{answer.answer_name}}</strong></p>
             {% if answer.willCome %}
                 <p>This guest will attend</p>
             {% endif %}
+            {% if answer.plusOne %}
+                <p>This guest will bring others</p>
+            {% endif %}
+
             <p>comment: {{answer.comment}}</p>
         </li>
+        <br>
     {% endfor %}
     </ul>
 {% else %}
     <p>No answer is available.</p>
 {% endif %}
+</center>
+{% endblock %}

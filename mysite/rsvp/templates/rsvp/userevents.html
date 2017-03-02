@@ -1,47 +1,56 @@
-<h1>welcome: {{user.username}}</h1>
-<h3><a href="{% url 'polls:event_create' user.id %}">Create Event</a></h3>
+{% extends 'rsvp/base.html' %}
+{% block title %}Userpage{% endblock %}
+{% block body %}
+<center>
+<h1>welcome: {{user.username}} !</h1>
+
+<h3><a class="glyphicon glyphicon-plus " href="{% url 'rsvp:event_create' user.id %}"> CreateEvent</a></h3>
 <h3>Event created by this user are: </h3>
 {% if event_created %}
     <ul>
     {% for event in event_created %}
-        <li><a href="{% url 'polls:event' event.id %}">{{ event.title }}</a></li>
+        <li><a href="{% url 'rsvp:event' event.id %}">{{ event.title }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
     <p>No event created by this user.</p>
 {% endif %}
-
-
+    <br>
+<h3>You are assigned as vender for the following events:</h3>
 {% if vender_relation %}
-    <h3>You are assigned as vender for the following events: </h3>
     <ul>
         {% for vr in vender_relation %}
-        <li><a href="{% url 'polls:vender' vr.id %}">{{ vr }}</a></li>
+        <li><a href="{% url 'rsvp:vender' vr.id %}">{{ vr.event_title }}</a></li>
         {% endfor %}
     </ul>
 {% else %}
     <p>You are not assigned as vender to any events.</p>
 {% endif %}
-
-
-
-
-
-{% if event_invited %}
-    <h3>Answer posted by this user are:</h3>
+    <br>
+    <h3>You have responded to the following events:</h3>
+    {% if answer_made %}
     <ul>
         {% for answer in answer_made %}
-        <li><a href="{% url 'polls:answer' answer.id %}">{{ answer }}</a></li>
+        <li><a href="{% url 'rsvp:answer' answer.id %}">{{ answer.event_title }}</a></li>
         {% endfor %}
     </ul>
-    <h3>Answer needed from this user are:</h3>
+    {% else %}
+    <p>You haven't posted any answer yet</p>
+    {% endif %}
+    <br>
+    <h3>You have to answer the respond to the following events(if you wish to attend):</h3>
+    {% if event_invited %}
+
     <ul>
     {% for relation in event_invited %}
         {% if not relation.isAnswered and not relation.isFinal %}
-            <li><a href="{% url 'polls:answer_create' relation.id user.id %}">{{ relation }}</a></li>
+            <li><a href="{% url 'rsvp:answer_create' relation.id user.id %}">{{ relation.event_title }}</a></li>
         {% endif %}
     {% endfor %}
     </ul>
-{% else %}
+    {% else %}
     <p>You are not invited to any event</p>
-{% endif %}
+    {% endif %}
+
+</center>
+{% endblock %}

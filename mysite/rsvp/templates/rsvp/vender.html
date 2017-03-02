@@ -1,3 +1,7 @@
+{% extends 'rsvp/base.html' %}
+{% block title %}Edit Event{% endblock %}
+{% block body %}
+<center>
 <h1>Event Information:</h1>
 <p>Event Title: {{event.title}}</p>
 <p>Event Owner: {{event.owner_name}}</p>
@@ -20,7 +24,7 @@
     <ul>
     {% for answer in answers %}
         <li>
-            <p>guest name: {{answer.answer_name}}</p>
+            <p><strong>guest name: {{answer.answer_name}}</strong></p>
             <p>comment: {{answer.comment}}</p>
             {% if event.venderPermitted %}
                 {% if answer.plusOne %}
@@ -38,7 +42,7 @@
 {% endif %}
 
 {% if event.isFinal %}
-<p>This event is finalized</p>
+    <p><strong>This event is finalized</strong>></p>
 {% else %}
     <h2>Do you want to finalize this event?</h2>
     <form method = 'post' enctype="multipart/form-data">
@@ -46,4 +50,6 @@
     {{ff.as_p}}
     <input type="submit" value = "ok" />
     </form>
+</center>
 {% endif %}
+{% endblock %}

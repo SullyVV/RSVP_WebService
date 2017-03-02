@@ -1,14 +1,10 @@
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Answer Edit</title>
-</head>
-<body>
-<h1>Edit Answer：</h1>
+{% extends 'rsvp/base.html' %}
+{% block title %}Edit Respond{% endblock %}
+{% block body %}
+<h1>Edit Response：</h1>
 <form method = 'post' enctype="multipart/form-data">
     {% csrf_token %}
 {{af.as_p}}
 <input type="submit" value = "ok" />
 </form>
-</body>
-</html>
+{% endblock %}
