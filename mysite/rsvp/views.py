@@ -247,6 +247,8 @@ def register(request):
         uf = UserForm_register(request.POST)
         if uf.is_valid():
             username = uf.cleaned_data["username"]
+            if User.objects.filter(username = username).exists():
+                return render(request, 'rsvp/register_error.html', {'uf':uf})
             password = uf.cleaned_data["password"]
             email = uf.cleaned_data["email"]
             user = User()
@@ -274,7 +276,8 @@ def login(request):
                 userid = User.objects.get(username = username).id
                 return HttpResponseRedirect(reverse('rsvp:user', args=(userid,)))
             else:
-                return render_to_response('rsvp/login.html', {'uf':uf})
+                error_msg = "Wrong password, please try again"
+                return render_to_response('rsvp/login.html', {'uf':uf, 'error_msg':error_msg})
     else:
         uf = UserForm_login()
     return render_to_response('rsvp/login.html', {'uf':uf})
