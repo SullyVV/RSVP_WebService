@@ -27,8 +27,6 @@ class EventEditForm(forms.Form):
     event_plusOne = forms.BooleanField(label="Can bring more than one person", required=False)
     event_venderPermitted = forms.BooleanField(label="Is vender permitted to see the response?", required=False)
 
-
-
 class AnswerForm(forms.Form):
     comment = forms.CharField(label="comment (e.g. Any food allergy, seat preference ?)", max_length=200)
     willCome = forms.BooleanField(label="I will come", required=False)

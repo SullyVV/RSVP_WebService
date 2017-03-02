@@ -1,3 +1,4 @@
+from django import forms
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
@@ -31,10 +32,10 @@ def event_create(request, user_id):
             event_time = ef.cleaned_data['event_time']
             event_place = ef.cleaned_data['event_place']
             event_description = ef.cleaned_data['event_description']
-            event_guests = ef.cleaned_data['event_guests']
             event_plusOne = ef.cleaned_data['event_plusOne']
             event_vender = ef.cleaned_data['event_vender']
             event_venderPermitted = ef.cleaned_data['event_venderPermitted']
+            event_guests = ef.cleaned_data['event_guests']
             #we guarantee guests and venders exists before proceed
             guestList = event_guests.split(";")
             for guest in guestList:
@@ -126,16 +127,20 @@ def event_edit(request, event_id):
             event_place = uf.cleaned_data['event_place']
             event_description = uf.cleaned_data['event_description']
             event_plusOne = uf.cleaned_data['event_plusOne']
-            event_newGuests = uf.cleaned_data['event_newGuests']
             event_venderPermitted = uf.cleaned_data['event_venderPermitted']
-            newguestList = event_newGuests.split(";")
-            # we gurantee all new guests are valid before proceed
-            for guest in newguestList:
-                if not User.objects.filter(username = guest).exists():
-                    return render_to_response("rsvp/event_edit.html", {'uf': uf, 'user': user, 'error_guest':error_guest },
+            event_newGuests = uf.cleaned_data['event_newGuests']
+            print("new guest name is here:")
+            print(event_newGuests)
+            # if new friend list not empty, check if they are legal
+            if not event_newGuests == '':
+                newguestList = event_newGuests.split(";")
+                # we gurantee all new guests are valid before proceed
+                for guest in newguestList:
+                    if not User.objects.filter(username = guest).exists():
+                        return render_to_response("rsvp/event_edit.html", {'uf': uf, 'user': user, 'error_guest':error_guest },
                                               RequestContext(request))
+            # update event table
             event = get_object_or_404(Event, pk=event_id)
-            #update event table
             event.event_time = event_time
             event.place = event_place
             event.descrption = event_description
@@ -153,27 +158,29 @@ def event_edit(request, event_id):
                 user = User.objects.get(username=guest_name)
                 to_email.append(user.email)
             send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
-            #update relationship table, if user exist, save into relationship
-            to_email = []
-            subject = "New Invitation from RSVP Web App"
-            contact_msg = "Hey, You have pending invitations at RSVP web app."
-            for guest in newguestList:
-                if User.objects.filter(username = guest).exists():
-                    relation = Relationship()
-                    relation.event_title = event.title
-                    relation.guest_name = guest
-                    relation.isAnswered = False
-                    relation.save()
-                    user = User.objects.get(username=guest)
-                    to_email.append(user.email)
-            # send to new guests
-            send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
+            #update relationship table and email each new guest if there are new guests
+            if not event_newGuests == '':
+                to_email = []
+                subject = "New Invitation from RSVP Web App"
+                contact_msg = "Hey, You have pending invitations at RSVP web app."
+                for guest in newguestList:
+                    if User.objects.filter(username = guest).exists():
+                        relation = Relationship()
+                        relation.event_title = event.title
+                        relation.guest_name = guest
+                        relation.isAnswered = False
+                        relation.save()
+                        user = User.objects.get(username=guest)
+                        to_email.append(user.email)
+                # send to new guests
+                send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
             #redirect to event page
             return HttpResponseRedirect(reverse('rsvp:event', args=(event_id,)))
     else:
         uf = EventEditForm()
+        # prefill each blank with existing data
+        uf = EventEditForm({'event_time': event.event_time, 'event_place':event.place, 'event_description':event.descrption, 'event_plusOne':event.plusOne, 'event_venderPermitted':event.venderPermitted})
     return render_to_response("rsvp/event_edit.html", {'uf':uf, 'user':user}, RequestContext(request))
-
 
 def answer(request, answer_id):
     answer = get_object_or_404(Answer, pk=answer_id)
@@ -199,6 +206,7 @@ def answer_edit(request, answer_id):
             return HttpResponseRedirect(reverse('rsvp:answer', args=(answer_id,)))
     else:
         af = AnswerForm()
+        af = AnswerForm({'comment': answer.comment, 'willCome':answer.willCome, 'plusOne':answer.plusOne})
     return render_to_response("rsvp/answer_edit.html", {'af':af, 'user':user}, RequestContext(request))
 
 
