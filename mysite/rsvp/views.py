@@ -13,7 +13,6 @@ from django.conf import settings
 
 # Create your views here.
 
-
 def event(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
     user = get_object_or_404(User, username=event.owner_name)
@@ -247,9 +246,10 @@ def register(request):
         uf = UserForm_register(request.POST)
         if uf.is_valid():
             username = uf.cleaned_data["username"]
+            salt = username
             if User.objects.filter(username = username).exists():
                 return render(request, 'rsvp/register_error.html', {'uf':uf})
-            password = uf.cleaned_data["password"]
+            password = hash(uf.cleaned_data["password"] + salt)
             email = uf.cleaned_data["email"]
             user = User()
             user.username = username
@@ -270,7 +270,8 @@ def login(request):
         if uf.is_valid():
             username = uf.cleaned_data['username']
             password = uf.cleaned_data['password']
-            user = User.objects.filter(username = username, password = password)
+            salt = username
+            user = User.objects.filter(username = username, password = hash(password + salt))
             if user:
                 #redirect to user page by userid
                 userid = User.objects.get(username = username).id
