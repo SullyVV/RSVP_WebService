@@ -3,6 +3,12 @@
 {% block body %}
 <center>
 <h1>Create Event：</h1>
+{% if error_guest %}
+    <p>{{error_guest}}</p>
+    {% endif %}
+    {%if error_vender%}
+    <p>{{error_vender}}</p>
+    {% endif %}
 <form method = 'post' enctype="multipart/form-data">
     {% csrf_token %}
 {{ef.as_p}}

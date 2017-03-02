@@ -12,7 +12,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 # Create your views here.
-
+error_guest = 'One or more of your guests does not exist in our database, please try again'
+error_vender = 'Assigned vender does not exist in our database, please try again'
 def event(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
     user = get_object_or_404(User, username=event.owner_name)
@@ -34,6 +35,14 @@ def event_create(request, user_id):
             event_plusOne = ef.cleaned_data['event_plusOne']
             event_vender = ef.cleaned_data['event_vender']
             event_venderPermitted = ef.cleaned_data['event_venderPermitted']
+            #we guarantee guests and venders exists before proceed
+            guestList = event_guests.split(";")
+            for guest in guestList:
+                if not User.objects.filter(username = guest).exists():
+                    return render_to_response("rsvp/event_create.html", {'ef': ef, 'user': user, 'error_guest':error_guest },
+                                              RequestContext(request))
+            if not User.objects.filter(username = event_vender).exists():
+                return render_to_response("rsvp/event_create.html", {'ef': ef, 'user': user, 'error_vender':error_vender}, RequestContext(request))
             event = Event()
             event.created_by = user
             event.owner_name = user.username
@@ -45,23 +54,20 @@ def event_create(request, user_id):
             event.plusOne = event_plusOne
             event.venderPermitted = event_venderPermitted
             event.save()
+            to_email = []
+            subject = "New invitation from RSVP.com"
+            from_email = settings.EMAIL_HOST_USER
+            contact_msg = "Hey, You have pending invitations at RSVP web app"
             #create relations for this event
-            guestList = event_guests.split(";")
             for guest in guestList:
                 relation = Relationship()
                 relation.event_title = event_title
                 relation.guest_name = guest
                 relation.isAnswered = False
                 relation.save()
-            to_email = []
-            subject = "New invitation from RSVP.com"
-            from_email = settings.EMAIL_HOST_USER
-            contact_msg = "Hey, You have pending invitations at RSVP web app"
-            for guest in guestList:
-                user = get_object_or_404(User, username = guest)
+                user = get_object_or_404(User, username=guest)
                 to_email.append(user.email)
             # send to all guests
-            print(to_email)
             send_mail(subject, contact_msg, from_email, to_email, fail_silently=False)
             #create vender relationship for this event
             vender_user = get_object_or_404(User, username=event_vender)
@@ -123,6 +129,11 @@ def event_edit(request, event_id):
             event_newGuests = uf.cleaned_data['event_newGuests']
             event_venderPermitted = uf.cleaned_data['event_venderPermitted']
             newguestList = event_newGuests.split(";")
+            # we gurantee all new guests are valid before proceed
+            for guest in newguestList:
+                if not User.objects.filter(username = guest).exists():
+                    return render_to_response("rsvp/event_edit.html", {'uf': uf, 'user': user, 'error_guest':error_guest },
+                                              RequestContext(request))
             event = get_object_or_404(Event, pk=event_id)
             #update event table
             event.event_time = event_time
