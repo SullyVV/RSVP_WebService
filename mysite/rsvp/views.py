@@ -72,7 +72,6 @@ def event_create(request, user_id):
             vender.vender_name = vender_user.username
             vender.save()
             return HttpResponseRedirect(reverse('rsvp:user', args=(user_id,)))
-            # return redirect('rsvp:login')
     else:
         ef = EventForm()
     return render_to_response("rsvp/event_create.html", {'ef': ef, 'user':user}, RequestContext(request))
@@ -187,7 +186,6 @@ def answer_edit(request, answer_id):
             answer.save()
             #redirect to event page
             return HttpResponseRedirect(reverse('rsvp:answer', args=(answer_id,)))
-            #return redirect('rsvp:login')
     else:
         af = AnswerForm()
     return render_to_response("rsvp/answer_edit.html", {'af':af, 'user':user}, RequestContext(request))
@@ -208,7 +206,6 @@ def answer_create(request, relation_id, user_id):
             answer.event_title = event.title
             answer.answered_by = user
             answer.answer_name = user.username
-            #answer.data = datetime.date.now()
             answer.comment = comment
             answer.plusOne = plusOne
             answer.willCome = willCome
@@ -220,15 +217,12 @@ def answer_create(request, relation_id, user_id):
             answer = Answer.objects.filter(event_title = event.title).last()
             print(answer.answer_name)
             return HttpResponseRedirect(reverse('rsvp:answer', args=(answer.id,)))
-            #return redirect('rsvp:login')
     else:
         af = AnswerForm()
     return render_to_response("rsvp/answer_create.html", {'event':event,'af':af, 'user':user}, RequestContext(request))
 
 def index(request):
     return render(request, 'rsvp/index.html')
-    return render(request, 'rsvp/base.html')
-    #return render(request, 'rsvp/index.html', {'latest_question_list': latest_question_list,})
 
 def user(request, userid):
     user = get_object_or_404(User, pk=userid)
