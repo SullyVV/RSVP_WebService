@@ -16,6 +16,7 @@ from django.conf import settings
 error_guest = 'One or more of your guests does not exist in our database, please try again'
 error_vender = 'Assigned vender does not exist in our database, please try again'
 error_count = 'You are not allowed to bring people with you'
+error_create = 'The event title is occupied, try another one'
 def event(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
     user = get_object_or_404(User, username=event.owner_name)
@@ -30,6 +31,9 @@ def event_create(request, user_id):
         ef = EventForm(request.POST)
         if ef.is_valid():
             event_title = ef.cleaned_data['event_title']
+            #check if there is collision in event title
+            if Event.objects.filter(title = event_title).exists():
+                return render_to_response("rsvp/event_create.html", {'ef': ef, 'user': user, 'error_create':error_create}, RequestContext(request))
             event_time = ef.cleaned_data['event_time']
             event_place = ef.cleaned_data['event_place']
             event_description = ef.cleaned_data['event_description']

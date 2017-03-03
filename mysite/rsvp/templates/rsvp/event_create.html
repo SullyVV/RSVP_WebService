@@ -3,6 +3,9 @@
 {% block body %}
 <center>
 <h1>Create Event：</h1>
+    {% if error_create %}
+        <h3>{{error_create}}</h3>
+    {% endif %}
 {% if error_guest %}
     <p>{{error_guest}}</p>
     {% endif %}
