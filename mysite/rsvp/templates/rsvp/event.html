@@ -8,7 +8,7 @@
 <p>Event Descrption: {{event.descrption}}</p>
 <p>Event Date: {{event.event_time}}</p>
 <p>Event Place: {{event.place}}</p>
-
+<p>Current number of guests for this event is: {{event.totalCounts}}</p>
 <p>Invited guests:
 {% for relation in relations %}
     {{relation.guest_name}}&nbsp;
@@ -21,7 +21,7 @@
 <a href="{% url 'rsvp:event_edit' event.id %}">Edit?</a>
 {% endif %}
 
-<h2>here are others's response</h2>
+<h2>Here are others's response</h2>
 {% if answers %}
     <ul>
     {% for answer in answers %}

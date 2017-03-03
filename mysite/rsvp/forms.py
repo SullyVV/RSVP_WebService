@@ -31,6 +31,6 @@ class AnswerForm(forms.Form):
     comment = forms.CharField(label="comment (e.g. Any food allergy, seat preference ?)", max_length=200)
     willCome = forms.BooleanField(label="I will come", required=False)
     plusOne = forms.BooleanField(label="I will bring people with me", required=False)
-
+    count = forms.IntegerField(label="How many people will come to this event? (including yourself)", min_value=1)
 class FinalForm(forms.Form):
     final = forms.BooleanField(label="Final", required=False)

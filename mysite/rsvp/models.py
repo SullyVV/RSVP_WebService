@@ -21,7 +21,7 @@ class Event(models.Model):
     plusOne = models.BooleanField(default=False)
     isFinal = models.BooleanField(default=False)
     venderPermitted = models.BooleanField(default=True)
-
+    totalCounts = models.IntegerField(default=0)
     def __str__(self):
         return self.title + " -- " + str(self.id)
 
@@ -33,6 +33,7 @@ class Answer(models.Model):
     comment = models.CharField(max_length=200, default="none")
     plusOne = models.BooleanField(default=False)
     willCome = models.BooleanField(default=False)
+    count = models.IntegerField(default=0)
     isEditable = models.BooleanField(default=True)
     def __str__(self):
         return str(self.event.title) + " -- " + str(self.answered_by)

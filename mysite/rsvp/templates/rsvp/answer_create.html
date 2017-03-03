@@ -7,8 +7,15 @@
 <p>Event Descrption: {{event.descrption}}</p>
 <p>Event Date: {{event.event_time}}</p>
 <p>Event Place: {{event.place}}</p>
-
+{% if event.plusOne %}
+<p>This event allows you to bring other people with you.</p>
+{% else %}
+<p>This event does not allow you to bring other people with you</p>
+{% endif %}
 <h1>Respond (respond if you wish to attend)：</h1>
+{% if error_count%}
+<h2>Sorry, you are not allowed to bring people to this event with you.</h2>
+{% endif %}
 <form method = 'post' enctype="multipart/form-data">
     {% csrf_token %}
 {{af.as_p}}

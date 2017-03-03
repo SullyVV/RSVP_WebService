@@ -2,6 +2,9 @@
 {% block title %}Edit Respond{% endblock %}
 {% block body %}
 <h1>Edit Response：</h1>
+{% if error_count%}
+<h2>Sorry, you are not allowed to bring people to this event with you.</h2>
+{% endif %}
 <form method = 'post' enctype="multipart/form-data">
     {% csrf_token %}
 {{af.as_p}}

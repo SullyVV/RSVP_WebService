@@ -15,6 +15,7 @@ from django.conf import settings
 # Create your views here.
 error_guest = 'One or more of your guests does not exist in our database, please try again'
 error_vender = 'Assigned vender does not exist in our database, please try again'
+error_count = 'You are not allowed to bring people with you'
 def event(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
     user = get_object_or_404(User, username=event.owner_name)
@@ -192,16 +193,29 @@ def answer_edit(request, answer_id):
     answer = get_object_or_404(Answer, pk=answer_id)
     username = answer.answer_name
     user = get_object_or_404(User, username=username)
+    event = get_object_or_404(Event, title=answer.event_title)
     if request.method == "POST":
         af = AnswerForm(request.POST)
         if af.is_valid():
+            old_count = answer.count
             comment = af.cleaned_data['comment']
             plusOne = af.cleaned_data['plusOne']
             willCome = af.cleaned_data['willCome']
+            count = af.cleaned_data['count']
+            # check if the answer's people count is legal
+            if not event.plusOne and (plusOne or count > 1):
+                return render_to_response("rsvp/answer_edit.html",
+                                          {'event': event, 'af': af, 'user': user, 'error_count': error_count},
+                                          RequestContext(request))
             answer.comment = comment
             answer.plusOne = plusOne
             answer.willCome = willCome
+            answer.count = count
             answer.save()
+            #update event's total headcount
+            new_count = event.totalCounts - old_count + count
+            event.totalCounts = new_count
+            event.save()
             #redirect to event page
             return HttpResponseRedirect(reverse('rsvp:answer', args=(answer_id,)))
     else:
@@ -220,6 +234,11 @@ def answer_create(request, relation_id, user_id):
             comment = af.cleaned_data['comment']
             plusOne = af.cleaned_data['plusOne']
             willCome = af.cleaned_data['willCome']
+            count = af.cleaned_data['count']
+            # check if the answer's people count is legal
+            if not event.plusOne and (plusOne or count > 1):
+                return render_to_response("rsvp/answer_create.html", {'event': event, 'af': af, 'user': user, 'error_count':error_count},
+                                          RequestContext(request))
             answer = Answer()
             answer.event = event
             answer.event_title = event.title
@@ -228,7 +247,11 @@ def answer_create(request, relation_id, user_id):
             answer.comment = comment
             answer.plusOne = plusOne
             answer.willCome = willCome
+            answer.count = count
             answer.save()
+            #update this event's total headcount
+            event.totalCounts = event.totalCounts + count
+            event.save()
             #mark relation as answered
             relation.isAnswered = True
             relation.save()
