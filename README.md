@@ -19,10 +19,12 @@ The guest is able to respond to, view and edit only his/her own answer before fi
 The vendor is able to view the responses of the questions which he/she has been permitted to and he/she is able to finalize a question to prevent further modification of the answer.
 
 
-To see and use our web-app, please follow the steps described below:
+To see and use our web-app, please follow the steps described below: first you have to cd into second mysite directory with manager.py file
 
 1 run the server on your local machine by typing: python manage.py runserver ‘ip address’:’port number’ (ex. python3 manage.py runserver 127.0.0.1:8000)
 
 2 Visit index page at http://127.0.0.1:8000/rsvp/ (if running on local machine). You might need to change to the ip address and portal of your virtual machine if needed, remember to modify the configuration of ALLOW_HOST in the settings.py with your virtual machine ip address.
 
 3 play around with our web app!
+
+You can check out all the codes and danger log in this repo.
