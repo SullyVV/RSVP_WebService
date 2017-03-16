@@ -1,14 +1,15 @@
 from django import forms
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 
-from .models import User, Event
 from django.urls import reverse
 from django.shortcuts import render, redirect
-
+from django.contrib.auth.models import User
 from .forms import UserForm_register, UserForm_login, EventForm, AnswerForm, FinalForm, EventEditForm
-from .models import User, Event, Answer, Relationship, Vender
+from .models import Event, Answer, Relationship, Vender
+
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -18,6 +19,8 @@ error_vender = 'Assigned vender does not exist in our database, please try again
 error_count = 'You are not allowed to bring people with you'
 error_create = 'The event title is occupied, try another one'
 def event(request, event_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('rsvp:login'))
     event = get_object_or_404(Event, pk=event_id)
     user = get_object_or_404(User, username=event.owner_name)
     answers = Answer.objects.filter(event_title=event.title)
@@ -26,6 +29,8 @@ def event(request, event_id):
 
 
 def event_create(request, user_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('rsvp:login'))
     user = get_object_or_404(User, pk=user_id)
     if request.method == "POST":
         ef = EventForm(request.POST)
@@ -33,7 +38,7 @@ def event_create(request, user_id):
             event_title = ef.cleaned_data['event_title']
             #check if there is collision in event title
             if Event.objects.filter(title = event_title).exists():
-                return render_to_response("rsvp/event_create.html", {'ef': ef, 'user': user, 'error_create':error_create}, RequestContext(request))
+                return render(request, 'rsvp/event_create.html', {'ef': ef, 'user': user, 'error_create':error_create})
             event_time = ef.cleaned_data['event_time']
             event_place = ef.cleaned_data['event_place']
             event_description = ef.cleaned_data['event_description']
@@ -45,10 +50,9 @@ def event_create(request, user_id):
             guestList = event_guests.split(";")
             for guest in guestList:
                 if not User.objects.filter(username = guest).exists():
-                    return render_to_response("rsvp/event_create.html", {'ef': ef, 'user': user, 'error_guest':error_guest },
-                                              RequestContext(request))
+                    return render(request, 'rsvp/event_create.html', {'ef': ef, 'user': user, 'error_guest':error_guest })
             if not User.objects.filter(username = event_vender).exists():
-                return render_to_response("rsvp/event_create.html", {'ef': ef, 'user': user, 'error_vender':error_vender}, RequestContext(request))
+                return render(request, 'rsvp/event_create.html',{'ef': ef, 'user': user, 'error_vender':error_vender})
             event = Event()
             event.created_by = user
             event.owner_name = user.username
@@ -86,10 +90,12 @@ def event_create(request, user_id):
             return HttpResponseRedirect(reverse('rsvp:user', args=(user_id,)))
     else:
         ef = EventForm()
-    return render_to_response("rsvp/event_create.html", {'ef': ef, 'user':user}, RequestContext(request))
+    return render(request, 'rsvp/event_create.html', {'ef': ef, 'user':user})
 
 
 def vender(request, vender_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('rsvp:login'))
     vender_relation = get_object_or_404(Vender, pk=vender_id)
     event = vender_relation.event
     vender = vender_relation.vender
@@ -116,13 +122,15 @@ def vender(request, vender_id):
             return HttpResponseRedirect(reverse('rsvp:user', args=(vender.id,)))
     else:
         ff = FinalForm()
-    return render_to_response("rsvp/vender.html", {'ff':ff, 'event':event, 'answers':answers, 'relations':relations, 'user':vender}, RequestContext(request))
+    return render(request, 'rsvp/vender.html', {'ff':ff, 'event':event, 'answers':answers, 'relations':relations, 'user':vender})
 
 
 
 
 
 def event_edit(request, event_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('rsvp:login'))
     event = get_object_or_404(Event, pk=event_id)
     user = get_object_or_404(User, username=event.owner_name)
     if request.method == "POST":
@@ -142,8 +150,7 @@ def event_edit(request, event_id):
                 # we gurantee all new guests are valid before proceed
                 for guest in newguestList:
                     if not User.objects.filter(username = guest).exists():
-                        return render_to_response("rsvp/event_edit.html", {'uf': uf, 'user': user, 'error_guest':error_guest },
-                                              RequestContext(request))
+                        return render(request, 'rsvp/event_edit.html', {'uf': uf, 'user': user, 'error_guest':error_guest })
             # update event table
             event = get_object_or_404(Event, pk=event_id)
             event.event_time = event_time
@@ -185,15 +192,19 @@ def event_edit(request, event_id):
         uf = EventEditForm()
         # prefill each blank with existing data
         uf = EventEditForm({'event_time': event.event_time, 'event_place':event.place, 'event_description':event.descrption, 'event_plusOne':event.plusOne, 'event_venderPermitted':event.venderPermitted})
-    return render_to_response("rsvp/event_edit.html", {'uf':uf, 'user':user}, RequestContext(request))
+    return render(request, 'rsvp/event_edit.html', {'uf':uf, 'user':user})
 
 def answer(request, answer_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('rsvp:login'))
     answer = get_object_or_404(Answer, pk=answer_id)
     username = answer.answer_name
     user = get_object_or_404(User, username=username)
     return render(request, 'rsvp/answer.html', {'answer':answer, 'user':user})
 
 def answer_edit(request, answer_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('rsvp:login'))
     answer = get_object_or_404(Answer, pk=answer_id)
     username = answer.answer_name
     user = get_object_or_404(User, username=username)
@@ -208,9 +219,7 @@ def answer_edit(request, answer_id):
             count = af.cleaned_data['count']
             # check if the answer's people count is legal
             if not event.plusOne and (plusOne or count > 1):
-                return render_to_response("rsvp/answer_edit.html",
-                                          {'event': event, 'af': af, 'user': user, 'error_count': error_count},
-                                          RequestContext(request))
+                return render(request, 'rsvp/answer_edit.html', {'event': event, 'af': af, 'user': user, 'error_count': error_count})
             answer.comment = comment
             answer.plusOne = plusOne
             answer.willCome = willCome
@@ -225,10 +234,12 @@ def answer_edit(request, answer_id):
     else:
         af = AnswerForm()
         af = AnswerForm({'comment': answer.comment, 'willCome':answer.willCome, 'plusOne':answer.plusOne})
-    return render_to_response("rsvp/answer_edit.html", {'af':af, 'user':user}, RequestContext(request))
+    return render(request, 'rsvp/answer_edit.html', {'af':af, 'user':user})
 
 
 def answer_create(request, relation_id, user_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('rsvp:login'))
     relation = get_object_or_404(Relationship, pk=relation_id)
     event = get_object_or_404(Event, title=relation.event_title)
     user = get_object_or_404(User, pk=user_id)
@@ -241,8 +252,7 @@ def answer_create(request, relation_id, user_id):
             count = af.cleaned_data['count']
             # check if the answer's people count is legal
             if not event.plusOne and (plusOne or count > 1):
-                return render_to_response("rsvp/answer_create.html", {'event': event, 'af': af, 'user': user, 'error_count':error_count},
-                                          RequestContext(request))
+                return render(request, 'rsvp/answer_create.html', {'event': event, 'af': af, 'user': user, 'error_count':error_count})
             answer = Answer()
             answer.event = event
             answer.event_title = event.title
@@ -265,12 +275,14 @@ def answer_create(request, relation_id, user_id):
             return HttpResponseRedirect(reverse('rsvp:answer', args=(answer.id,)))
     else:
         af = AnswerForm()
-    return render_to_response("rsvp/answer_create.html", {'event':event,'af':af, 'user':user}, RequestContext(request))
+    return render(request, 'rsvp/answer_create.html', {'event':event, 'af':af, 'user':user})
 
 def index(request):
     return render(request, 'rsvp/index.html')
 
 def user(request, userid):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('rsvp:login'))
     user = get_object_or_404(User, pk=userid)
     event_created = Event.objects.filter(owner_name = user.username)
     event_invited = Relationship.objects.filter(guest_name = user.username)
@@ -300,8 +312,7 @@ def register(request):
             return redirect('rsvp:login')
     else:
         uf = UserForm_register()
-    return render_to_response("rsvp/register.html", {'uf':uf}, RequestContext(request))
-
+    return render(request, 'rsvp/register.html', {'uf':uf})
 
 
 def login(request):
@@ -310,18 +321,23 @@ def login(request):
         if uf.is_valid():
             username = uf.cleaned_data['username']
             password = uf.cleaned_data['password']
-            salt = username
-            user = User.objects.filter(username = username, password = hash(password + salt))
-            if user:
-                #redirect to user page by userid
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                auth_login(request, user)
                 userid = User.objects.get(username = username).id
                 return HttpResponseRedirect(reverse('rsvp:user', args=(userid,)))
             else:
                 error_msg = "Wrong password, please try again"
-                return render_to_response('rsvp/login.html', {'uf':uf, 'error_msg':error_msg})
+                return render_to_response('rsvp/login.html', {'uf': uf, 'error_msg': error_msg})
     else:
         uf = UserForm_login()
-    return render_to_response('rsvp/login.html', {'uf':uf})
+    return render(request, 'rsvp/login.html', {'uf':uf})
+
+def logout(request):
+    auth_logout(request)
+    # redirect to index page
+    return HttpResponseRedirect(reverse('rsvp:index'))
+
 
 def send(request):
     subject = "Site contact form"

@@ -6,11 +6,12 @@
     {% if error_guest %}
     <p>{{error_guest}}</p>
     {% endif %}
-
+<div class="container">
 <form method = 'post' enctype="multipart/form-data">
     {% csrf_token %}
-{{uf.as_p}}
+    {{uf.as_p}}
 <input type="submit" value = "ok" />
 </form>
+</div>
 </center>
 {% endblock %}

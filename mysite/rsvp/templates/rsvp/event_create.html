@@ -12,11 +12,13 @@
     {%if error_vender%}
     <p>{{error_vender}}</p>
     {% endif %}
+    <div class="container">
 <form method = 'post' enctype="multipart/form-data">
     {% csrf_token %}
 {{ef.as_p}}
 <input type="submit" value = "ok" />
 </form>
+    </div>
 </center>
 
 {% endblock %}

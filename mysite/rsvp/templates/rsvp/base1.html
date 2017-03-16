@@ -9,6 +9,16 @@
     <link rel="stylesheet" type="text/css" href="{% static 'rsvp/style.css' %}"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <style type="text/css">
+    .container {
+        width: 500px;
+        clear: both;
+    }
+    .container input {
+        width: 100%;
+        clear: both;
+    }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-inverse">
@@ -35,7 +45,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'rsvp:register' %}">
+                    <a href="/rsvp/accounts/register/">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>&nbsp; Register
                     </a>
                 </li>

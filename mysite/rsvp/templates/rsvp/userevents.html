@@ -5,7 +5,7 @@
 <h1>welcome: {{user.username}} !</h1>
 
 <h3><a class="glyphicon glyphicon-plus " href="{% url 'rsvp:event_create' user.id %}"> CreateEvent</a></h3>
-<h3>Event created by this user are: </h3>
+<h3>You have created these events: </h3>
 {% if event_created %}
     <ul>
     {% for event in event_created %}
@@ -38,7 +38,7 @@
     <p>You haven't posted any answer yet</p>
     {% endif %}
     <br>
-    <h3>You have to answer the respond to the following events(if you wish to attend):</h3>
+    <h3>You need to respond to the following events(if you wish to attend):</h3>
     {% if event_invited %}
 
     <ul>

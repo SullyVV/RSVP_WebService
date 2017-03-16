@@ -1,13 +1,28 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
+from django.contrib.auth import authenticate
+
+from .registration.backends.simple.views import RegistrationView
 from . import views
 app_name = 'rsvp'
+class MyRegistrationView(RegistrationView):
+    def get_success_url(self, user):
+        return "/rsvp/"
+
+    def register(self, form):
+        new_user = form.save()
+        print("in new class")
+        return new_user
 urlpatterns = [
     #/rsvp/
     url(r'^$', views.index, name='index'),
     #/rsvp/register/,
     url(r'^register/$', views.register, name='register'),
+    url(r'^accounts/register/', MyRegistrationView.as_view(), name='registration_register'),
+    #url(r'^accounts/', include('registration.backends.simple.urls')),
     #/login/,
     url(r'^login/$', views.login, name='login'),
+    #/logout/,
+    url(r'^logout/$', views.logout, name='logout'),
     #/user/admin,
     url(r'^user/(?P<userid>[0-9]+)/$', views.user, name='user'),
     #/rsvp/event/5
